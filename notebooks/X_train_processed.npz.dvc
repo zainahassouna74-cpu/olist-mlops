@@ -1,0 +1,5 @@
+outs:
+- md5: 40dc0ffe8af1df89ed99fe52479704a8
+  size: 2036719
+  hash: md5
+  path: X_train_processed.npz

@@ -1,0 +1,23 @@
+project:
+  name: olist-mlops
+  version: "1.0.0"
+
+paths:
+  data_dir: data
+  models_dir: models
+  logs_dir: logs
+
+model:
+  model_file: models/logistic_regression_model.pkl
+  preprocessor_file: models/preprocessor.pkl
+  threshold: 0.5
+
+database:
+  host: localhost
+  port: 5432
+  database: olist
+  user: postgres
+
+api:
+  host: 0.0.0.0
+  port: 8000

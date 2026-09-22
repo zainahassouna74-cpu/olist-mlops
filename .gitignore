@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+logs/
+/models
+/notebooks/logistic_regression_model.pkl
+/notebooks/preprocessor.pkl
