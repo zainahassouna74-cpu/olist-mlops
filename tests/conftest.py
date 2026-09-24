@@ -1,4 +1,4 @@
-import src.inference.loader as loader
+from src.inference import loader
 
 
 class DummyPreprocessor:
