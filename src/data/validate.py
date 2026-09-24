@@ -26,7 +26,7 @@ def validate_training_data():
     except Exception:  # noqa: BLE001
         data_asset = data_source.add_dataframe_asset(name="training_data")
 
-        # Create or retrieve batch definition
+    # Create or retrieve batch definition
     try:
         batch_definition = data_asset.get_batch_definition("whole_training_data")
     except Exception:  # noqa: BLE001
