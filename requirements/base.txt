@@ -7,3 +7,6 @@ scipy
 joblib
 pyyaml
 python-dotenv
+pydantic
+fastapi
+uvicorn

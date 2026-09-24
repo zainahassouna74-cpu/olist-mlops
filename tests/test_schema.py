@@ -1,6 +1,7 @@
-from app.schemas import OrderInput
 import pytest
 from pydantic import ValidationError
+
+from app.schemas import OrderInput
 
 
 def test_valid_order_schema():

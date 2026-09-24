@@ -1,9 +1,12 @@
 import pandas as pd
 
 from src.inference.loader import load_artifacts
+from src.utils.config import load_config
 
+config = load_config()
+THRESHOLD = float(config["model"]["threshold"])
 
-model, preprocessor, feature_list = load_artifacts()
+model, preprocessor, feature_list, model_version = load_artifacts()
 
 
 def predict_order(order_data: dict):
@@ -12,11 +15,12 @@ def predict_order(order_data: dict):
     transformed = preprocessor.transform(df)
 
     probability = model.predict_proba(transformed)[0][1]
-    prediction = int(probability >= 0.5)
+    prediction = int(probability >= THRESHOLD)
 
     return {
         "prediction": prediction,
         "probability": float(probability),
+        "model_version": model_version,
     }
 
 

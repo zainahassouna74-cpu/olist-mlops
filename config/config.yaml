@@ -6,11 +6,19 @@ paths:
   data_dir: data
   models_dir: models
   logs_dir: logs
+  results_file: notebooks/results_summary.json
 
 model:
   model_file: models/logistic_regression_model.pkl
   preprocessor_file: models/preprocessor.pkl
-  threshold: 0.5
+  feature_list_file: models/feature_list.json
+  threshold: 0.75
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment_name: olist_delivery_delay
+  registered_model_name: olist_delivery_delay_model
+  stage: Production
 
 database:
   host: localhost

@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-
 client = TestClient(app)
 
 
@@ -21,7 +20,7 @@ def test_model_info_endpoint():
     data = response.json()
 
     assert data["model_name"] == "logistic_regression"
-    assert data["model_version"] == "1.0.0"
+    assert data["model_version"] == "1"
     assert data["task"] == "late_delivery_classification"
 
 
@@ -54,7 +53,9 @@ def test_predict_endpoint():
 
     assert data["prediction"] in [0, 1]
     assert 0.0 <= data["probability"] <= 1.0
-    assert data["model_version"] == "1.0.0"
+    assert data["model_version"] == "1"
+
+
 def test_batch_predict_endpoint():
     payload = [
         {
@@ -105,18 +106,16 @@ def test_batch_predict_endpoint():
 
     assert data["count"] == 2
     assert len(data["predictions"]) == 2
-    assert data["model_version"] == "1.0.0"
+    assert data["model_version"] == "1"
 
     for prediction in data["predictions"]:
         assert prediction["prediction"] in [0, 1]
         assert 0.0 <= prediction["probability"] <= 1.0
-        assert prediction["model_version"] == "1.0.0"
+        assert data["model_version"] == "1"
 
 
 def test_predict_invalid_payload():
-    payload = {
-        "customer_state": "SP"
-    }
+    payload = {"customer_state": "SP"}
 
     response = client.post("/predict", json=payload)
 

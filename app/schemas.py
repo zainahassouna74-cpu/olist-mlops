@@ -16,7 +16,7 @@ class OrderInput(BaseModel):
 
     unique_products: int = Field(ge=1)
     unique_sellers: int = Field(ge=1)
-    unique_categories: int = Field(ge=1)
+    unique_categories: int = Field(ge=0)
 
     purchase_year: int
     purchase_month: int = Field(ge=1, le=12)
@@ -25,16 +25,14 @@ class OrderInput(BaseModel):
 
     estimated_delivery_days: int = Field(ge=0)
 
-from typing import List, Optional
-
 
 class PredictionResponse(BaseModel):
     prediction: int
-    probability: Optional[float] = None
+    probability: float | None = None
     model_version: str
 
 
 class BatchPredictionResponse(BaseModel):
     count: int
-    predictions: List[PredictionResponse]
+    predictions: list[PredictionResponse]
     model_version: str

@@ -1,3 +1,11 @@
-/config.local
-/tmp
-/cache
+-r base.txt
+
+pytest
+black
+ruff
+
+dvc==3.67.0
+mlflow
+great-expectations
+pre-commit
+psycopg2-binary
