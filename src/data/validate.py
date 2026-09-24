@@ -26,15 +26,15 @@ def validate_training_data():
     except Exception:  # noqa: BLE001
         data_asset = data_source.add_dataframe_asset(name="training_data")
 
-    # Create or retrieve batch definition
+        # Create or retrieve batch definition
     try:
-       batch_definition = data_asset.get_batch_definition("whole_training_data")
+        batch_definition = data_asset.get_batch_definition("whole_training_data")
     except Exception:  # noqa: BLE001
-     batch_definition = data_asset.add_batch_definition_whole_dataframe(
-        "whole_training_data"
-    )
+        batch_definition = data_asset.add_batch_definition_whole_dataframe(
+            "whole_training_data"
+        )
 
-     batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
     expectations = [
         gx.expectations.ExpectTableColumnsToMatchSet(
