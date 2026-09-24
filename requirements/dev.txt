@@ -9,3 +9,5 @@ mlflow
 great-expectations
 pre-commit
 psycopg2-binary
+
+httpx2
