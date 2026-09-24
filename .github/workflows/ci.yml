@@ -30,10 +30,13 @@ jobs:
         run: |
           ruff check app src tests
 
-
       - name: Run tests
         run: |
           python -m pytest -v
+
+      - name: Create models directory for Docker build
+        run: |
+          mkdir -p models
 
       - name: Build Docker image
         run: |
