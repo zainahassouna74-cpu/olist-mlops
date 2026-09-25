@@ -1,5 +1,5 @@
-import json
 from pathlib import Path
+import json
 
 import joblib
 import mlflow
@@ -7,10 +7,13 @@ import mlflow.sklearn
 from mlflow import MlflowClient
 
 from src.utils.config import load_config
+from src.utils.logger import get_logger
+
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 config = load_config()
+logger = get_logger(__name__)
 
 MODEL_PATH = BASE_DIR / config["model"]["model_file"]
 PREPROCESSOR_PATH = BASE_DIR / config["model"]["preprocessor_file"]
@@ -35,15 +38,28 @@ def register_model():
     mlflow.set_tracking_uri(TRACKING_URI)
     mlflow.set_experiment(EXPERIMENT_NAME)
 
-    with mlflow.start_run(run_name="logistic_regression_production") as run:
+    with mlflow.start_run(
+        run_name="logistic_regression_production"
+    ) as run:
 
         # Log important parameters
-        mlflow.log_param("model_type", results["model"])
-        mlflow.log_param("threshold", config["model"]["threshold"])
-        mlflow.log_param("project_version", config["project"]["version"])
+        mlflow.log_param(
+            "model_type",
+            results["model"],
+        )
+        mlflow.log_param(
+            "threshold",
+            config["model"]["threshold"],
+        )
+        mlflow.log_param(
+            "project_version",
+            config["project"]["version"],
+        )
 
         # Log model parameters
-        mlflow.log_params(model.get_params())
+        mlflow.log_params(
+            model.get_params()
+        )
 
         # Log evaluation metrics
         mlflow.log_metrics(
@@ -57,9 +73,20 @@ def register_model():
         )
 
         # Log preprocessing artifacts
-        mlflow.log_artifact(str(PREPROCESSOR_PATH), artifact_path="preprocessing")
-        mlflow.log_artifact(str(FEATURE_LIST_PATH), artifact_path="preprocessing")
-        mlflow.log_artifact(str(RESULTS_PATH), artifact_path="evaluation")
+        mlflow.log_artifact(
+            str(PREPROCESSOR_PATH),
+            artifact_path="preprocessing",
+        )
+
+        mlflow.log_artifact(
+            str(FEATURE_LIST_PATH),
+            artifact_path="preprocessing",
+        )
+
+        mlflow.log_artifact(
+            str(RESULTS_PATH),
+            artifact_path="evaluation",
+        )
 
         # Log the trained model
         mlflow.sklearn.log_model(
@@ -77,19 +104,38 @@ def register_model():
         name=REGISTERED_MODEL_NAME,
     )
 
-    # Move the registered version to the stage required by the task
+    # Move the registered version to the configured stage
     client = MlflowClient()
+
     client.transition_model_version_stage(
         name=REGISTERED_MODEL_NAME,
         version=registered_model.version,
         stage=MODEL_STAGE,
     )
 
-    print(f"Run ID: {run_id}")
-    print(f"Registered model: {REGISTERED_MODEL_NAME}")
-    print(f"Model version: {registered_model.version}")
-    print(f"Stage: {MODEL_STAGE}")
-    print("MLflow registration completed successfully.")
+    logger.info(
+        "Run ID: %s",
+        run_id,
+    )
+
+    logger.info(
+        "Registered model: %s",
+        REGISTERED_MODEL_NAME,
+    )
+
+    logger.info(
+        "Model version: %s",
+        registered_model.version,
+    )
+
+    logger.info(
+        "Stage: %s",
+        MODEL_STAGE,
+    )
+
+    logger.info(
+        "MLflow registration completed successfully."
+    )
 
 
 if __name__ == "__main__":

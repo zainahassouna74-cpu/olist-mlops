@@ -38,11 +38,8 @@ def test_predict_endpoint():
         "unique_products": 1,
         "unique_sellers": 1,
         "unique_categories": 1,
-        "purchase_year": 2018,
-        "purchase_month": 5,
-        "purchase_dayofweek": 2,
-        "purchase_hour": 14,
-        "estimated_delivery_days": 20,
+        "order_purchase_timestamp": "2018-05-10T14:00:00",
+        "order_estimated_delivery_date": "2018-05-30T14:00:00",
     }
 
     response = client.post("/predict", json=payload)
@@ -71,11 +68,8 @@ def test_batch_predict_endpoint():
             "unique_products": 1,
             "unique_sellers": 1,
             "unique_categories": 1,
-            "purchase_year": 2018,
-            "purchase_month": 5,
-            "purchase_dayofweek": 2,
-            "purchase_hour": 14,
-            "estimated_delivery_days": 20,
+            "order_purchase_timestamp": "2018-05-10T14:00:00",
+            "order_estimated_delivery_date": "2018-05-30T14:00:00",
         },
         {
             "customer_zip_code_prefix": 22041,
@@ -90,11 +84,8 @@ def test_batch_predict_endpoint():
             "unique_products": 2,
             "unique_sellers": 1,
             "unique_categories": 2,
-            "purchase_year": 2018,
-            "purchase_month": 6,
-            "purchase_dayofweek": 4,
-            "purchase_hour": 10,
-            "estimated_delivery_days": 15,
+            "order_purchase_timestamp": "2018-06-05T10:00:00",
+            "order_estimated_delivery_date": "2018-06-20T10:00:00",
         },
     ]
 
@@ -111,12 +102,33 @@ def test_batch_predict_endpoint():
     for prediction in data["predictions"]:
         assert prediction["prediction"] in [0, 1]
         assert 0.0 <= prediction["probability"] <= 1.0
-        assert data["model_version"] == "1"
+        assert prediction["model_version"] == "1"
 
 
 def test_predict_invalid_payload():
-    payload = {"customer_state": "SP"}
+    payload = {
+        "customer_state": "SP"
+    }
 
     response = client.post("/predict", json=payload)
 
     assert response.status_code == 422
+
+
+def test_swagger_docs_available():
+    response = client.get("/docs")
+
+    assert response.status_code == 200
+
+
+def test_openapi_schema_available():
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+
+    schema = response.json()
+
+    assert "/health" in schema["paths"]
+    assert "/model-info" in schema["paths"]
+    assert "/predict" in schema["paths"]
+    assert "/batch-predict" in schema["paths"]

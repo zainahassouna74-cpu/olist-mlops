@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -18,12 +20,8 @@ class OrderInput(BaseModel):
     unique_sellers: int = Field(ge=1)
     unique_categories: int = Field(ge=0)
 
-    purchase_year: int
-    purchase_month: int = Field(ge=1, le=12)
-    purchase_dayofweek: int = Field(ge=0, le=6)
-    purchase_hour: int = Field(ge=0, le=23)
-
-    estimated_delivery_days: int = Field(ge=0)
+    order_purchase_timestamp: datetime
+    order_estimated_delivery_date: datetime
 
 
 class PredictionResponse(BaseModel):

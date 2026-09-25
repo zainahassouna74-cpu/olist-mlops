@@ -9,3 +9,4 @@ mlflow
 great-expectations
 pre-commit
 psycopg2-binary
+/config.local

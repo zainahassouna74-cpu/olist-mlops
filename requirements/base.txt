@@ -2,7 +2,7 @@ pandas
 numpy
 sqlalchemy
 psycopg2-binary
-scikit-learn
+scikit-learn==1.7.0
 scipy
 joblib
 pyyaml
@@ -10,3 +10,4 @@ python-dotenv
 pydantic
 fastapi
 uvicorn
+mlflow==3.16.1
