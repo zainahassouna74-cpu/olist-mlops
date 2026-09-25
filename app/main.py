@@ -8,6 +8,8 @@ from fastapi import FastAPI, HTTPException
 
 from app.schemas import BatchPredictionResponse, OrderInput, PredictionResponse
 from src.inference.predict import model_version, predict_order
+from src.monitoring.drift import calculate_prediction_drift
+from src.utils.config import load_config
 from src.utils.logger import get_logger
 
 app = FastAPI(
@@ -16,6 +18,7 @@ app = FastAPI(
 )
 
 logger = get_logger(__name__)
+config = load_config()
 
 # -------------------------------------------------------------------
 # Monitoring state
@@ -36,8 +39,12 @@ PREDICTION_LOG_PATH = Path("logs/predictions.jsonl")
 PREDICTION_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
-def save_prediction_log(order_data: dict, result: dict, latency_ms: float) -> None:
-    """Store predictions so they can be evaluated later when ground truth arrives."""
+def save_prediction_log(
+    order_data: dict,
+    result: dict,
+    latency_ms: float,
+) -> None:
+    """Store predictions so they can be evaluated later."""
 
     record = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -49,11 +56,23 @@ def save_prediction_log(order_data: dict, result: dict, latency_ms: float) -> No
         "actual_delivery_status": None,
     }
 
-    with PREDICTION_LOG_PATH.open("a", encoding="utf-8") as file:
-        file.write(json.dumps(record, default=str) + "\n")
+    with PREDICTION_LOG_PATH.open(
+        "a",
+        encoding="utf-8",
+    ) as file:
+        file.write(
+            json.dumps(
+                record,
+                default=str,
+            )
+            + "\n"
+        )
 
 
-def update_monitoring(result: dict, latency_ms: float) -> None:
+def update_monitoring(
+    result: dict,
+    latency_ms: float,
+) -> None:
     with metrics_lock:
         monitoring["request_count"] += 1
         monitoring["prediction_count"] += 1
@@ -73,7 +92,9 @@ def register_error() -> None:
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+    }
 
 
 @app.get("/metrics")
@@ -100,32 +121,68 @@ def metrics():
         "request_count": request_count,
         "prediction_count": prediction_count,
         "error_count": error_count,
-        "error_rate": round(error_rate, 4),
-        "average_latency_ms": round(average_latency_ms, 2),
+        "error_rate": round(
+            error_rate,
+            4,
+        ),
+        "average_latency_ms": round(
+            average_latency_ms,
+            2,
+        ),
         "prediction_distribution": {
             "late": late_predictions,
             "on_time": on_time_predictions,
-            "late_rate": round(late_prediction_rate, 4),
+            "late_rate": round(
+                late_prediction_rate,
+                4,
+            ),
         },
         "model_version": model_version,
     }
 
 
-@app.post("/predict", response_model=PredictionResponse)
+@app.get("/monitoring/drift")
+def prediction_drift():
+    monitoring_config = config["monitoring"]
+
+    return calculate_prediction_drift(
+        log_path=PREDICTION_LOG_PATH,
+        baseline_late_rate=monitoring_config["baseline_late_rate"],
+        alert_threshold=monitoring_config["drift_alert_threshold"],
+        min_samples=monitoring_config["min_drift_samples"],
+    )
+
+
+@app.post(
+    "/predict",
+    response_model=PredictionResponse,
+)
 def predict(order: OrderInput):
     start_time = time.perf_counter()
 
     try:
         order_data = order.model_dump()
+
         result = predict_order(order_data)
 
         latency_ms = (time.perf_counter() - start_time) * 1000
 
-        update_monitoring(result, latency_ms)
-        save_prediction_log(order_data, result, latency_ms)
+        update_monitoring(
+            result,
+            latency_ms,
+        )
+
+        save_prediction_log(
+            order_data,
+            result,
+            latency_ms,
+        )
 
         logger.info(
-            "prediction_request | input=%s | output=%s | latency_ms=%.2f | "
+            "prediction_request | "
+            "input=%s | "
+            "output=%s | "
+            "latency_ms=%.2f | "
             "model_version=%s",
             order_data,
             result,
@@ -141,6 +198,7 @@ def predict(order: OrderInput):
 
     except Exception as exc:
         register_error()
+
         logger.exception("prediction_failed")
 
         raise HTTPException(
@@ -149,8 +207,13 @@ def predict(order: OrderInput):
         ) from exc
 
 
-@app.post("/batch-predict", response_model=BatchPredictionResponse)
-def batch_predict(orders: list[OrderInput]):
+@app.post(
+    "/batch-predict",
+    response_model=BatchPredictionResponse,
+)
+def batch_predict(
+    orders: list[OrderInput],
+):
     if not orders:
         raise HTTPException(
             status_code=400,
@@ -164,6 +227,7 @@ def batch_predict(orders: list[OrderInput]):
 
         for order in orders:
             order_data = order.model_dump()
+
             result = predict_order(order_data)
 
             results.append(
@@ -175,10 +239,19 @@ def batch_predict(orders: list[OrderInput]):
             )
 
         latency_ms = (time.perf_counter() - start_time) * 1000
+
         latency_per_prediction = latency_ms / len(results)
 
-        for order, result in zip(orders, results, strict=True):
-            update_monitoring(result, latency_per_prediction)
+        for order, result in zip(
+            orders,
+            results,
+            strict=True,
+        ):
+            update_monitoring(
+                result,
+                latency_per_prediction,
+            )
+
             save_prediction_log(
                 order.model_dump(),
                 result,
@@ -186,8 +259,12 @@ def batch_predict(orders: list[OrderInput]):
             )
 
         logger.info(
-            "batch_prediction_request | count=%d | input=%s | output=%s | "
-            "latency_ms=%.2f | model_version=%s",
+            "batch_prediction_request | "
+            "count=%d | "
+            "input=%s | "
+            "output=%s | "
+            "latency_ms=%.2f | "
+            "model_version=%s",
             len(orders),
             [order.model_dump() for order in orders],
             results,
@@ -203,6 +280,7 @@ def batch_predict(orders: list[OrderInput]):
 
     except Exception as exc:
         register_error()
+
         logger.exception("batch_prediction_failed")
 
         raise HTTPException(

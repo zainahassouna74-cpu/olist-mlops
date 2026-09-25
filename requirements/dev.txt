@@ -1,13 +1,10 @@
 -r base.txt
 
-pytest
+pytest==9.1.1
 black==26.5.1
 ruff==0.16.8
-
-dvc
-mlflow
-great-expectations
-pre-commit
-psycopg2-binary
-
-httpx2
+dvc==3.67.1
+great-expectations==1.23.1
+pre-commit==4.6.2
+httpx==0.28.1
+psycopg2-binary==2.9.12

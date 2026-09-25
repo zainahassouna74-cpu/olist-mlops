@@ -29,3 +29,8 @@ database:
 api:
   host: 0.0.0.0
   port: 8000
+
+  monitoring:
+  baseline_late_rate: 0.0903
+  drift_alert_threshold: 0.10
+  min_drift_samples: 20
