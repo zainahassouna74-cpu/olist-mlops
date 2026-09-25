@@ -6,21 +6,21 @@ from app.schemas import OrderInput
 
 def test_valid_order_schema():
     order = OrderInput(
-    customer_zip_code_prefix=13023,
-    customer_city="campinas",
-    customer_state="SP",
-    item_count=1,
-    total_price=120.0,
-    total_freight=18.0,
-    payment_count=1,
-    total_payment=138.0,
-    max_installments=3,
-    unique_products=1,
-    unique_sellers=1,
-    unique_categories=1,
-    order_purchase_timestamp="2018-05-10T14:00:00",
-    order_estimated_delivery_date="2018-05-30T14:00:00",
-)
+        customer_zip_code_prefix=13023,
+        customer_city="campinas",
+        customer_state="SP",
+        item_count=1,
+        total_price=120.0,
+        total_freight=18.0,
+        payment_count=1,
+        total_payment=138.0,
+        max_installments=3,
+        unique_products=1,
+        unique_sellers=1,
+        unique_categories=1,
+        order_purchase_timestamp="2018-05-10T14:00:00",
+        order_estimated_delivery_date="2018-05-30T14:00:00",
+    )
 
     assert order.customer_city == "campinas"
 

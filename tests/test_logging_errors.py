@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 from app.main import app
 from src.utils.logger import get_logger
 
-
 client = TestClient(app)
 
 
@@ -13,8 +12,7 @@ def test_logger_has_file_and_console_handlers():
     logger = get_logger("test_logger")
 
     has_file_handler = any(
-        isinstance(handler, logging.FileHandler)
-        for handler in logger.handlers
+        isinstance(handler, logging.FileHandler) for handler in logger.handlers
     )
 
     has_console_handler = any(
@@ -34,9 +32,7 @@ def test_logger_level_is_info():
 
 
 def test_missing_fields_return_422():
-    payload = {
-        "customer_state": "SP"
-    }
+    payload = {"customer_state": "SP"}
 
     response = client.post("/predict", json=payload)
 

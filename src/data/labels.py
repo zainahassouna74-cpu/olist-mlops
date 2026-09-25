@@ -22,8 +22,7 @@ def create_late_delivery_label(df):
     ).copy()
 
     df["is_late"] = (
-        df["order_delivered_customer_date"]
-        > df["order_estimated_delivery_date"]
+        df["order_delivered_customer_date"] > df["order_estimated_delivery_date"]
     ).astype(int)
 
     return df

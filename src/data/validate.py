@@ -5,7 +5,6 @@ import pandas as pd
 
 from src.utils.logger import get_logger
 
-
 logger = get_logger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -90,9 +89,7 @@ def validate_training_data(data_path=None):
     data_path = Path(data_path)
 
     if not data_path.exists():
-        raise FileNotFoundError(
-            f"Training data not found: {data_path}"
-        )
+        raise FileNotFoundError(f"Training data not found: {data_path}")
 
     logger.info("Loading training data from %s", data_path)
 
@@ -116,53 +113,33 @@ def validate_training_data(data_path=None):
     ]
 
     for column in numeric_columns:
-        if column in df.columns and not pd.api.types.is_numeric_dtype(
-            df[column]
-        ):
-            raise ValueError(
-                f"Column '{column}' must be numeric."
-            )
+        if column in df.columns and not pd.api.types.is_numeric_dtype(df[column]):
+            raise ValueError(f"Column '{column}' must be numeric.")
 
     # Load Great Expectations project context
     context = gx.get_context(mode="file")
 
     # Create or retrieve Pandas datasource
     try:
-        data_source = context.data_sources.get(
-            "olist_pandas"
-        )
+        data_source = context.data_sources.get("olist_pandas")
     except Exception:  # noqa: BLE001
-        data_source = context.data_sources.add_pandas(
-            "olist_pandas"
-        )
+        data_source = context.data_sources.add_pandas("olist_pandas")
 
     # Create or retrieve dataframe asset
     try:
-        data_asset = data_source.get_asset(
-            "training_data"
-        )
+        data_asset = data_source.get_asset("training_data")
     except Exception:  # noqa: BLE001
-        data_asset = data_source.add_dataframe_asset(
-            name="training_data"
-        )
+        data_asset = data_source.add_dataframe_asset(name="training_data")
 
     # Create or retrieve batch definition
     try:
-        batch_definition = (
-            data_asset.get_batch_definition(
-                "whole_training_data"
-            )
-        )
+        batch_definition = data_asset.get_batch_definition("whole_training_data")
     except Exception:  # noqa: BLE001
-        batch_definition = (
-            data_asset.add_batch_definition_whole_dataframe(
-                "whole_training_data"
-            )
+        batch_definition = data_asset.add_batch_definition_whole_dataframe(
+            "whole_training_data"
         )
 
-    batch = batch_definition.get_batch(
-        batch_parameters={"dataframe": df}
-    )
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df})
 
     expectations = [
         # Schema
@@ -170,24 +147,12 @@ def validate_training_data(data_path=None):
             column_set=EXPECTED_COLUMNS,
             exact_match=True,
         ),
-
         # Required values
-        gx.expectations.ExpectColumnValuesToNotBeNull(
-            column="order_id"
-        ),
-        gx.expectations.ExpectColumnValuesToNotBeNull(
-            column="customer_id"
-        ),
-        gx.expectations.ExpectColumnValuesToNotBeNull(
-            column="customer_state"
-        ),
-        gx.expectations.ExpectColumnValuesToNotBeNull(
-            column="total_price"
-        ),
-        gx.expectations.ExpectColumnValuesToNotBeNull(
-            column="is_late"
-        ),
-
+        gx.expectations.ExpectColumnValuesToNotBeNull(column="order_id"),
+        gx.expectations.ExpectColumnValuesToNotBeNull(column="customer_id"),
+        gx.expectations.ExpectColumnValuesToNotBeNull(column="customer_state"),
+        gx.expectations.ExpectColumnValuesToNotBeNull(column="total_price"),
+        gx.expectations.ExpectColumnValuesToNotBeNull(column="is_late"),
         # Missing-rate expectations
         gx.expectations.ExpectColumnValuesToNotBeNull(
             column="total_freight",
@@ -201,7 +166,6 @@ def validate_training_data(data_path=None):
             column="customer_city",
             mostly=0.99,
         ),
-
         # Numeric ranges
         gx.expectations.ExpectColumnValuesToBeBetween(
             column="item_count",
@@ -239,7 +203,6 @@ def validate_training_data(data_path=None):
             column="unique_categories",
             min_value=0,
         ),
-
         # Review score
         gx.expectations.ExpectColumnValuesToBeBetween(
             column="avg_review_score",
@@ -247,7 +210,6 @@ def validate_training_data(data_path=None):
             max_value=5,
             mostly=0.95,
         ),
-
         # Allowed categorical values
         gx.expectations.ExpectColumnValuesToBeInSet(
             column="customer_state",
@@ -257,7 +219,6 @@ def validate_training_data(data_path=None):
             column="order_status",
             value_set=VALID_ORDER_STATUS,
         ),
-
         # Binary target
         gx.expectations.ExpectColumnValuesToBeInSet(
             column="is_late",
@@ -283,18 +244,12 @@ def validate_training_data(data_path=None):
             all_success = False
 
     if not all_success:
-        logger.error(
-            "Great Expectations validation failed."
-        )
+        logger.error("Great Expectations validation failed.")
 
         # Our selected policy = REJECT invalid data
-        raise ValueError(
-            "Great Expectations validation failed."
-        )
+        raise ValueError("Great Expectations validation failed.")
 
-    logger.info(
-        "All Great Expectations checks passed."
-    )
+    logger.info("All Great Expectations checks passed.")
 
     return True
 

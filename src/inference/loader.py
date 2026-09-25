@@ -7,7 +7,6 @@ from mlflow import MlflowClient
 
 from src.utils.config import load_config
 
-
 config = load_config()
 
 TRACKING_URI = config["mlflow"]["tracking_uri"]
@@ -34,9 +33,7 @@ def load_artifacts():
     model_version = str(versions[0].version)
     run_id = versions[0].run_id
 
-    model_uri = (
-        f"models:/{REGISTERED_MODEL_NAME}/{MODEL_STAGE}"
-    )
+    model_uri = f"models:/{REGISTERED_MODEL_NAME}/{MODEL_STAGE}"
 
     model = mlflow.sklearn.load_model(model_uri)
 

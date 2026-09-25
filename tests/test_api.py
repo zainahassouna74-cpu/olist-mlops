@@ -106,9 +106,7 @@ def test_batch_predict_endpoint():
 
 
 def test_predict_invalid_payload():
-    payload = {
-        "customer_state": "SP"
-    }
+    payload = {"customer_state": "SP"}
 
     response = client.post("/predict", json=payload)
 

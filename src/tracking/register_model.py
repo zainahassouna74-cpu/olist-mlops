@@ -9,7 +9,6 @@ from mlflow import MlflowClient
 from src.utils.config import load_config
 from src.utils.logger import get_logger
 
-
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 config = load_config()
@@ -38,9 +37,7 @@ def register_model():
     mlflow.set_tracking_uri(TRACKING_URI)
     mlflow.set_experiment(EXPERIMENT_NAME)
 
-    with mlflow.start_run(
-        run_name="logistic_regression_production"
-    ) as run:
+    with mlflow.start_run(run_name="logistic_regression_production") as run:
 
         # Log important parameters
         mlflow.log_param(
@@ -57,9 +54,7 @@ def register_model():
         )
 
         # Log model parameters
-        mlflow.log_params(
-            model.get_params()
-        )
+        mlflow.log_params(model.get_params())
 
         # Log evaluation metrics
         mlflow.log_metrics(
@@ -133,9 +128,7 @@ def register_model():
         MODEL_STAGE,
     )
 
-    logger.info(
-        "MLflow registration completed successfully."
-    )
+    logger.info("MLflow registration completed successfully.")
 
 
 if __name__ == "__main__":

@@ -59,11 +59,6 @@ def test_pipeline_matches_manual_prediction():
         preprocessor,
     )
 
-    manual_probability = float(
-        model.predict_proba(transformed)[0][1]
-    )
+    manual_probability = float(model.predict_proba(transformed)[0][1])
 
-    assert abs(
-        pipeline_result["probability"]
-        - manual_probability
-    ) < 1e-10
+    assert abs(pipeline_result["probability"] - manual_probability) < 1e-10

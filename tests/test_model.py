@@ -5,9 +5,7 @@ from src.inference.loader import load_artifacts
 
 
 def test_model_artifacts_load_successfully():
-    model, preprocessor, feature_list, model_version = (
-        load_artifacts()
-    )
+    model, preprocessor, feature_list, model_version = load_artifacts()
 
     assert model is not None
     assert preprocessor is not None
@@ -44,9 +42,7 @@ def test_model_predict_proba_output():
         preprocessor,
     )
 
-    probabilities = model.predict_proba(
-        transformed
-    )
+    probabilities = model.predict_proba(transformed)
 
     assert len(probabilities) == 1
     assert len(probabilities[0]) == 2

@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 TARGET_COLUMN = "is_late"
 
 DROP_COLUMNS = [
@@ -26,9 +25,7 @@ def build_features(df):
     df = df.copy()
 
     columns_to_drop = [
-        column
-        for column in DROP_COLUMNS + [TARGET_COLUMN]
-        if column in df.columns
+        column for column in DROP_COLUMNS + [TARGET_COLUMN] if column in df.columns
     ]
 
     df = df.drop(columns=columns_to_drop)
@@ -49,25 +46,16 @@ def build_features(df):
         "order_purchase_timestamp" in df.columns
         and "order_estimated_delivery_date" in df.columns
     ):
-        df["purchase_year"] = (
-            df["order_purchase_timestamp"].dt.year
-        )
+        df["purchase_year"] = df["order_purchase_timestamp"].dt.year
 
-        df["purchase_month"] = (
-            df["order_purchase_timestamp"].dt.month
-        )
+        df["purchase_month"] = df["order_purchase_timestamp"].dt.month
 
-        df["purchase_dayofweek"] = (
-            df["order_purchase_timestamp"].dt.dayofweek
-        )
+        df["purchase_dayofweek"] = df["order_purchase_timestamp"].dt.dayofweek
 
-        df["purchase_hour"] = (
-            df["order_purchase_timestamp"].dt.hour
-        )
+        df["purchase_hour"] = df["order_purchase_timestamp"].dt.hour
 
         df["estimated_delivery_days"] = (
-            df["order_estimated_delivery_date"]
-            - df["order_purchase_timestamp"]
+            df["order_estimated_delivery_date"] - df["order_purchase_timestamp"]
         ).dt.total_seconds() / 86400
 
         df = df.drop(
@@ -78,14 +66,10 @@ def build_features(df):
         )
 
     existing_payment_columns = [
-        column
-        for column in PAYMENT_COLUMNS
-        if column in df.columns
+        column for column in PAYMENT_COLUMNS if column in df.columns
     ]
 
     if existing_payment_columns:
-        df[existing_payment_columns] = (
-            df[existing_payment_columns].fillna(0)
-        )
+        df[existing_payment_columns] = df[existing_payment_columns].fillna(0)
 
     return df

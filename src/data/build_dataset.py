@@ -73,17 +73,14 @@ def build_ml_table(tables):
     )
 
     # Product and seller information per item
-    items_details = (
-        items.merge(
-            products_info,
-            on="product_id",
-            how="left",
-        )
-        .merge(
-            sellers,
-            on="seller_id",
-            how="left",
-        )
+    items_details = items.merge(
+        products_info,
+        on="product_id",
+        how="left",
+    ).merge(
+        sellers,
+        on="seller_id",
+        how="left",
     )
 
     product_seller_agg = (
